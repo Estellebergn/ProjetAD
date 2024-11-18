@@ -1,0 +1,5 @@
+-	Standardiser les données.
+-	Clustering heureux/pas heureux riche/pauvre
+-	Pour les graphes, distances euclidienne (ou corrélation pays-pays). Choisir un seuil à partir duquel arête.
+-	Corrélation pays-pays et on ajoute le ladder score en couleur. 
+
