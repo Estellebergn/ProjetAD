@@ -3,3 +3,5 @@
 -	Pour les graphes, distances euclidienne (ou corrélation pays-pays). Choisir un seuil à partir duquel arête.
 -	Corrélation pays-pays et on ajoute le ladder score en couleur. 
 
+-   Afficher les centroïdes pour expliquer les clusters
+-   k-means ou Gaussian Mixture
