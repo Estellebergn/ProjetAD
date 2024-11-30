@@ -5,3 +5,9 @@
 
 -   Afficher les centroïdes pour expliquer les clusters
 -   k-means ou Gaussian Mixture
+
+
+
+The World Happiness Report is a landmark survey of the state of global happiness that ranks 156 countries by how happy their citizens perceive themselves to be. The World Happiness Report 2020 for the first time ranks cities around the world by their subjective well-being and digs more deeply into how the social, urban and natural environments combine to affect our happiness.
+
+https://www.kaggle.com/datasets/mathurinache/world-happiness-report?select=2020.csv

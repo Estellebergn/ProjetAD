@@ -1,10 +1,8 @@
 import dash
-from dash import dcc, html, Input, Output
+from dash import dcc, html, Input, Output, dash_table
 import plotly.express as px
 import pandas as pd
-
-# Exemple de jeu de données
-df = px.data.gapminder()
+import graph_func as gf
 
 # Initialiser l'application Dash
 app = dash.Dash(__name__, suppress_callback_exceptions=True)
@@ -36,9 +34,9 @@ app.layout = html.Div(
             id="tabs",
             value="tab1",
             children=[
-                dcc.Tab(label="Données", value="tab1", style=tab_style, selected_style=tab_selected_style),
-                dcc.Tab(label="Analyses", value="tab2", style=tab_style, selected_style=tab_selected_style),
-                dcc.Tab(label="Informations", value="tab3", style=tab_style, selected_style=tab_selected_style),
+                dcc.Tab(label="Vue d'ensemble des données", value="tab1"),# style=tab_style, selected_style=tab_selected_style),
+                dcc.Tab(label="Analyses", value="tab2"),#, style=tab_style, selected_style=tab_selected_style),
+                dcc.Tab(label="Informations", value="tab3"),# style=tab_style, selected_style=tab_selected_style),
             ],
         ),
         html.Div(id="content"),
@@ -54,22 +52,22 @@ def render_tab_content(tab_name):
     if tab_name == "tab1":
         # Graphique interactif
         df = pd.read_csv("data/2020.csv")
-        # Histogramme
+        # Histogramme pastel axes 
         data_2020 = df.sort_values(by='Ladder score', ascending=False)
-        fig = px.bar(
-            data_2020,
-            x='Country name',
-            y='Ladder score',
-            title='Histogramme du score de bonheur par pays en 2020',
-            color='Regional indicator'
-        )
-        fig.update_xaxes(categoryorder='total descending')
         return html.Div(
+            html.Div(
             [
-                dcc.Graph(figure=fig),
+                dcc.Graph(figure=gf.get_hist("data/2020.csv")),
             ],
             style={"padding": "10px"},
+            ),
+            html.Div(
+            [
+                dcc.Graph(figure=gf.get_carte("data/2020.csv")),
+            ],
+            )
         )
+        
 
     elif tab_name == "tab2":
         # Analyse
