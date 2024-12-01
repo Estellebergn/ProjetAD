@@ -1,6 +1,7 @@
 import plotly.express as px
 import networkx as nx
 import plotly.graph_objects as go
+import community.community_louvain as community
 
 def display_heatmap(df) : 
     fig = px.imshow(
@@ -98,4 +99,16 @@ def display_graph(graph, color_by) :
     fig.show()
 
 
+def communaute(graph) :
+    #Appliquer louvain
+    partition = community.best_partition(graph)
+    nx.set_node_attributes(graph, partition, 'community')
+    return graph, partition
 
+"""
+    #Ajouter les communaute comme partition
+    
+    for node, community_id in partition.items():
+        print(f"Pays : {node}, Communauté : {community_id}")
+
+"""
