@@ -128,7 +128,7 @@ def visualise_consensus(total_df, final_labels) :
 
     fig.update_layout(
         template="plotly_white",  # Fond blanc pour un look propre
-        showlegend=True
+        showlegend=False
     )
 
     fig.show()
