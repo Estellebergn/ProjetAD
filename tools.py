@@ -132,8 +132,3 @@ def visualise_consensus(total_df, final_labels) :
     )
 
     fig.show()
-
-
-
-
-    
