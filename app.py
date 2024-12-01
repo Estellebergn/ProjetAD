@@ -4,6 +4,7 @@ import plotly.express as px
 import pandas as pd
 import graph_func as graph
 import util_func as util
+import data_analysis_func as analysis
 
 # Initialiser l'application Dash
 app = dash.Dash(__name__, suppress_callback_exceptions=True)
@@ -36,8 +37,8 @@ app.layout = html.Div(
             value="tab1",
             children=[
                 dcc.Tab(label="Vue d'ensemble des données", value="tab1"),
-                dcc.Tab(label="Analyses", value="tab2"),
-                dcc.Tab(label="Informations", value="tab3"),
+                dcc.Tab(label="Clustering", value="tab2"),
+                dcc.Tab(label="Graph", value="tab3"),
             ],
         ),
         html.Div(id="content"),
@@ -132,7 +133,34 @@ def render_tab_content(tab_name):
 
     # Autres onglets
     elif tab_name == "tab2":
-        return html.Div("Contenu de l'onglet 2.")
+        return html.Div([
+            html.H3("Clustering des données"),
+            html.H2("Analyse en Composantes Principales (ACP)"),
+            html.P("L'Analyse en Composantes Principales (ACP) est une méthode de réduction de dimensionnalité qui permet de visualiser les données dans un espace à deux dimensions."),
+            html.P("Cette technique permet de réduire la dimensionnalité des données en les projetant dans un nouvel espace composé de composantes principales."),
+            html.P("Les composantes principales sont des combinaisons linéaires des variables initiales qui capturent le maximum de variance des données."),
+            html.Label("Sélectionner les données à afficher :"),
+            dcc.Dropdown(
+                id="chosen_year_2",
+                options=[
+                    {"label": "2017", "value": "data/2017.csv"},
+                    {"label": "2018", "value": "data/2018.csv"},
+                    {"label": "2019", "value": "data/2019.csv"},
+                    {"label": "2020", "value": "data/2020.csv"},
+                    {"label": "2021", "value": "data/2021.csv"},
+                    
+                ],
+                value="data/2020.csv",
+                style={"width": "100%", "marginBottom": "20px"},
+            ),
+            # Graphique ACP
+            html.Div(
+                [
+                    dcc.Graph(id="dynamic_pca"),
+                ],
+                style={"width": "100%", "display": "inline-block", "verticalAlign": "top", "padding": "10px"},
+            ),
+        ])
     elif tab_name == "tab3":
         return html.Div("Contenu de l'onglet 3.")
 
@@ -143,10 +171,7 @@ def render_tab_content(tab_name):
 )
 def update_graphs(selected_file):
     # Charger les données
-    df = pd.read_csv(selected_file)
-    selected_year = selected_file.split("/")[-1].split(".")[0]
-    data_sorted = util.normalize_columns(df, selected_file)
-    data_sorted = df.sort_values(by="Happiness Score", ascending=False)
+    data_sorted, selected_year = util.charge_data(selected_file)
 
 
     # Générer les graphiques
@@ -155,6 +180,22 @@ def update_graphs(selected_file):
 
     return carte_figure, hist_figure
 
+
+@app.callback(
+    Output("dynamic_pca", "figure"),
+    Input("chosen_year_2", "value"),
+)
+def update_pca(selected_file):
+    # Charger les données
+    data_sorted, selected_year = util.charge_data(selected_file)
+
+    # Analyse en Composantes Principales
+    pca_data = analysis.get_pca(data_sorted)
+
+    # Générer le graphique
+    pca_figure = graph.plot_pca(pca_data)
+
+    return pca_figure
 
 # Lancer le serveur
 if __name__ == "__main__":

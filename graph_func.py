@@ -34,3 +34,28 @@ def get_carte(data, year):
     carte.update_coloraxes(colorbar_title="Happiness<br>Score", colorbar_thickness=15)
 
     return carte
+
+def plot_pca(pca_data):
+    fig = px.scatter(
+        pca_data, 
+        template='plotly_white',
+        x='PC1', 
+        y="PC2", 
+        hover_name='Country',
+        color='Regional indicator',
+        hover_data={   # Masquer ou montrer
+            'Country': False,
+            'Regional indicator': False,
+            'Happiness Score': True,
+            'Generosity': True,
+            'Social support': True,
+            'Logged GDP per capita': True,
+            'Healthy life expectancy': True,
+            'Freedom': True,
+            'Perceptions of corruption': True
+        },
+        color_discrete_sequence=px.colors.qualitative.G10,
+        title='ACP des pays selon le score de bonheur en fonction des variables explicatives',
+    )
+    fig.update_traces(marker=dict(size=8))
+    return fig
