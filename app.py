@@ -52,8 +52,6 @@ app.layout = html.Div(
 def render_tab_content(tab_name):
     if tab_name == "tab1":
         # Charger les données
-        df = pd.read_csv("data/2020.csv")
-        data_2020 = df.sort_values(by="Ladder score", ascending=False)
 
         # Contenu de l'onglet 1
         return html.Div(
@@ -73,7 +71,7 @@ def render_tab_content(tab_name):
                                 
                             ],
                             value="data/2020.csv",
-                            style={"width": "50%", "marginBottom": "20px"},
+                            style={"width": "100%", "marginBottom": "20px"},
                         ),
                     ]
                 ),
@@ -103,10 +101,11 @@ def render_tab_content(tab_name):
                         ),
                     ],
                     style={
-                        "width": "39%",
+                        "width": "37%",
                         "display": "inline-block",
                         "verticalAlign": "top",
-                        "padding": "5px",
+                        "padding": "15px",
+                        "marginRight": "5px",
                         "backgroundColor": "#f9f9f9",
                         "borderRadius": "10px",
                         "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
@@ -118,7 +117,7 @@ def render_tab_content(tab_name):
                     [
                         dcc.Graph(id="dynamic_carte"),
                     ],
-                    style={"width": "59%", "display": "inline-block", "verticalAlign": "top", "padding": "10px"},
+                    style={"width": "57%", "display": "inline-block", "verticalAlign": "top", "padding": "10px"},
                 ),
                 
                 # Graphique interactif 2 : Histogramme
@@ -145,13 +144,14 @@ def render_tab_content(tab_name):
 def update_graphs(selected_file):
     # Charger les données
     df = pd.read_csv(selected_file)
+    selected_year = selected_file.split("/")[-1].split(".")[0]
     data_sorted = util.normalize_columns(df, selected_file)
     data_sorted = df.sort_values(by="Happiness Score", ascending=False)
 
 
     # Générer les graphiques
-    carte_figure = graph.get_carte(data_sorted)
-    hist_figure = graph.get_hist(data_sorted)
+    carte_figure = graph.get_carte(data_sorted,selected_year)
+    hist_figure = graph.get_hist(data_sorted,selected_year)
 
     return carte_figure, hist_figure
 

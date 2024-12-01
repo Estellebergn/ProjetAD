@@ -3,7 +3,7 @@ import pandas as pd
 # Fonction pour normaliser les noms de colonnes
 def normalize_columns(df, filename):
     column_mapping = {
-        "Happiness.score": "Happiness Score",
+        "Happiness.Score": "Happiness Score",
         "Ladder score": "Happiness Score",
         "Score": "Happiness Score",
         "Happiness Score": "Happiness Score",
