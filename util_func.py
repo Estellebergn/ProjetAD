@@ -52,6 +52,5 @@ def charge_data(filename):
     df = pd.read_csv(filename)
     selected_year = filename.split("/")[-1].split(".")[0]
     data = normalize_columns(df, filename)
-    print("ici", data.columns)
     data_sorted = data.sort_values(by="Happiness Score", ascending=False)
     return data_sorted, selected_year

@@ -134,33 +134,77 @@ def render_tab_content(tab_name):
     # Autres onglets
     elif tab_name == "tab2":
         return html.Div([
-            html.H3("Clustering des données"),
-            html.H2("Analyse en Composantes Principales (ACP)"),
-            html.P("L'Analyse en Composantes Principales (ACP) est une méthode de réduction de dimensionnalité qui permet de visualiser les données dans un espace à deux dimensions."),
-            html.P("Cette technique permet de réduire la dimensionnalité des données en les projetant dans un nouvel espace composé de composantes principales."),
-            html.P("Les composantes principales sont des combinaisons linéaires des variables initiales qui capturent le maximum de variance des données."),
-            html.Label("Sélectionner les données à afficher :"),
-            dcc.Dropdown(
-                id="chosen_year_2",
-                options=[
-                    {"label": "2017", "value": "data/2017.csv"},
-                    {"label": "2018", "value": "data/2018.csv"},
-                    {"label": "2019", "value": "data/2019.csv"},
-                    {"label": "2020", "value": "data/2020.csv"},
-                    {"label": "2021", "value": "data/2021.csv"},
-                    
-                ],
-                value="data/2020.csv",
-                style={"width": "100%", "marginBottom": "20px"},
+    # Section ACP
+    html.H3("Clustering des données"),
+    html.H2("Analyse en Composantes Principales (ACP)"),
+    html.P("L'Analyse en Composantes Principales (ACP) est une méthode de réduction de dimensionnalité qui permet de visualiser les données dans un espace à deux dimensions."),
+    html.P("Cette technique permet de réduire la dimensionnalité des données en les projetant dans un nouvel espace composé de composantes principales."),
+    html.P("Les composantes principales sont des combinaisons linéaires des variables initiales qui capturent le maximum de variance des données."),
+    
+    # Dropdown pour sélection de données
+    html.Label("Sélectionner les données à afficher :"),
+    dcc.Dropdown(
+        id="chosen_year_2",
+        options=[
+            {"label": "2017", "value": "data/2017.csv"},
+            {"label": "2018", "value": "data/2018.csv"},
+            {"label": "2019", "value": "data/2019.csv"},
+            {"label": "2020", "value": "data/2020.csv"},
+            {"label": "2021", "value": "data/2021.csv"},
+        ],
+        value="data/2020.csv",
+        style={"width": "100%", "marginBottom": "20px"},
+    ),
+    
+    # Graphique ACP
+    html.Div([
+        dcc.Graph(id="dynamic_pca"),
+    ], style={"width": "100%", "padding": "10px"}),
+
+    # Section Clustering
+    html.H2("Le Clustering (K-means et Gaussian Mixture)"),
+    html.P("Le clustering est une méthode d'apprentissage non supervisée qui permet de regrouper les données en fonction de leurs similarités."),
+    html.P("Les algorithmes de clustering permettent de diviser les données en groupes homogènes, appelés clusters."),
+    html.P("Deux algorithmes de clustering couramment utilisés sont le K-means et le Gaussian Mixture."),
+    html.P("Le K-means divise les données en K clusters en minimisant la somme des distances au carré entre les points et les centres de chaque cluster."),
+    html.P("Le Gaussian Mixture modélise les données comme un mélange de distributions gaussiennes, permettant de modéliser des clusters de formes complexes."),
+
+    # Dropdown pour choix d'algorithme
+    html.Label("Sélectionner l'algorithme de clustering :"),
+    dcc.Dropdown(
+        id="chosen_clustering",
+        options=[
+            {"label": "K-means", "value": "kmeans"},
+            {"label": "Gaussian Mixture", "value": "gmm"},
+        ],
+        value="kmeans",
+        style={"width": "100%", "marginBottom": "20px"},
+    ),
+    
+    # Graphique Scoring et paragraphe silhouette score
+    html.Div([
+        # Graphique des scores
+        html.Div([
+            dcc.Graph(id="dynamic_scoring"),
+        ], style={"width": "65%", "display": "inline-block", "padding": "10px"}),
+
+        # Paragraphe silhouette score
+        html.Div([
+            html.P("Le silhouette score mesure la cohérence des clusters en évaluant à quel point les points d'un cluster sont proches les uns des autres (cohésion) par rapport aux points des clusters voisins (séparation)."),
+            html.P(
+                id="dynamic_n_clusters_text",
+                children="Nombre de clusters trouvé :",
             ),
-            # Graphique ACP
-            html.Div(
-                [
-                    dcc.Graph(id="dynamic_pca"),
-                ],
-                style={"width": "100%", "display": "inline-block", "verticalAlign": "top", "padding": "10px"},
-            ),
-        ])
+        ], style={"width": "30%", "display": "inline-block", "verticalAlign": "top", "padding": "10px"}),
+    ]),
+
+    # Graphique Clustering
+    html.Div([
+        dcc.Graph(id="dynamic_clustering"),
+    ], style={"width": "100%", "padding": "10px"}),
+
+])
+
     elif tab_name == "tab3":
         return html.Div("Contenu de l'onglet 3.")
 
@@ -181,11 +225,30 @@ def update_graphs(selected_file):
     return carte_figure, hist_figure
 
 
+# @app.callback(
+    
+#     Input("chosen_year_2", "value"),
+# )
+# def update_pca(selected_file):
+#     # Charger les données
+#     data_sorted, selected_year = util.charge_data(selected_file)
+
+#     # Analyse en Composantes Principales
+#     pca_data = analysis.get_pca(data_sorted)
+
+    
+
+#     return pca_figure
+
 @app.callback(
+    Output("dynamic_clustering", "figure"),
     Output("dynamic_pca", "figure"),
+    Output("dynamic_scoring", "figure"),
+    Output("dynamic_n_clusters_text", "children"),
     Input("chosen_year_2", "value"),
+    Input("chosen_clustering", "value"),
 )
-def update_pca(selected_file):
+def update_clustering(selected_file, selected_clustering):
     # Charger les données
     data_sorted, selected_year = util.charge_data(selected_file)
 
@@ -195,7 +258,34 @@ def update_pca(selected_file):
     # Générer le graphique
     pca_figure = graph.plot_pca(pca_data)
 
-    return pca_figure
+    # Clustering
+    if selected_clustering == "kmeans":
+        
+        # Silhouette scores
+        scores = analysis.silhouette_scores_kmeans(pca_data[['PC1', 'PC2']], 10)
+        scoring_figure = graph.display_silhouette_scores(scores, "KMeans")
+        # nombre optimal de cluster = n_clusters
+        dynamic_n_clusters = [k for k, v in scores.items() if v == max(scores.values())][0]
+        kmeans, kmeans_labels, centroids = analysis.kmeans_clustering(pca_data[['PC1', 'PC2']], dynamic_n_clusters)
+        df_kmeans = pca_data.copy()
+        df_kmeans['Cluster'] = kmeans_labels.astype(str)
+        clustering_figure = graph.display_kmeans(df_kmeans)
+
+
+
+    elif selected_clustering == "gmm":
+        gmm, gmm_labels, _ = analysis.gausian_mixture_clustering(pca_data[['PC1', 'PC2']], 3)
+        final_labels = gmm_labels
+
+    # Visualisation du clustering
+    # clustering_figure = analysis.visualise_consensus(pca_data, final_labels)
+
+    # Mettre à jour le texte
+    n_clusters_text = f"Nombre de clusters trouvé : {dynamic_n_clusters}"
+
+    return clustering_figure, pca_figure, scoring_figure, n_clusters_text
+    
+
 
 # Lancer le serveur
 if __name__ == "__main__":
