@@ -3,7 +3,6 @@ import pandas as pd
 # Fonction pour normaliser les noms de colonnes
 def normalize_columns(df, filename):    
 
-    print('before', df.columns)
     # Filtre colonnes
     exclude_keywords = ["Dystopia", "whisker", "Explained by"]
     df = df[[col for col in df.columns if not any(keyword in col for keyword in exclude_keywords)]]
@@ -27,7 +26,6 @@ def normalize_columns(df, filename):
     # Ajout de la colonne "Regional indicator" si manquante
     if "Regional indicator" not in df.columns:
         df = add_region(df, filename)
-    print('after', df.columns)
     return df
 
 

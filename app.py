@@ -186,7 +186,7 @@ def render_tab_content(tab_name):
         # Graphique des scores
         html.Div([
             dcc.Graph(id="dynamic_scoring"),
-        ], style={"width": "65%", "display": "inline-block", "padding": "10px"}),
+        ], style={"width": "50%", "display": "inline-block"}),
 
         # Paragraphe silhouette score
         html.Div([
@@ -195,13 +195,20 @@ def render_tab_content(tab_name):
                 id="dynamic_n_clusters_text",
                 children="Nombre de clusters trouvé :",
             ),
-        ], style={"width": "30%", "display": "inline-block", "verticalAlign": "top", "padding": "10px"}),
+        ], style={"width": "40%", "display": "inline-block", "verticalAlign": "top", "padding": "10px"}),
     ]),
 
     # Graphique Clustering
     html.Div([
-        dcc.Graph(id="dynamic_clustering"),
-    ], style={"width": "100%", "padding": "10px"}),
+        dcc.Graph(id="dynamic_clustering", style={"width": "80%", "display": "inline-block", "verticalAlign": "top", "padding": "10px"}),
+        dcc.RadioItems(
+            options=[
+                {"label": "Avec centroides", "value": True},
+                {"label": "Sans centroides", "value": False},
+            ]
+            , id="centroides", value=False, style={"width": "15%", "display": "inline-block", "verticalAlign": "top", "padding": "10px"}),
+    ], ),
+
 
 ])
 
@@ -247,8 +254,9 @@ def update_graphs(selected_file):
     Output("dynamic_n_clusters_text", "children"),
     Input("chosen_year_2", "value"),
     Input("chosen_clustering", "value"),
+    Input("centroides", "value"),
 )
-def update_clustering(selected_file, selected_clustering):
+def update_clustering(selected_file, selected_clustering,centroides):
     # Charger les données
     data_sorted, selected_year = util.charge_data(selected_file)
 
@@ -258,30 +266,40 @@ def update_clustering(selected_file, selected_clustering):
     # Générer le graphique
     pca_figure = graph.plot_pca(pca_data)
 
+
     # Clustering
+
+    
     if selected_clustering == "kmeans":
-        
         # Silhouette scores
-        scores = analysis.silhouette_scores_kmeans(pca_data[['PC1', 'PC2']], 10)
+        scores = analysis.silhouette_scores(pca_data[['PC1', 'PC2']], 10, "kmeans")
+        dynamic_n_clusters = [k for k, v in scores.items() if v == max(scores.values())][0]
         scoring_figure = graph.display_silhouette_scores(scores, "KMeans")
         # nombre optimal de cluster = n_clusters
-        dynamic_n_clusters = [k for k, v in scores.items() if v == max(scores.values())][0]
-        kmeans, kmeans_labels, centroids = analysis.kmeans_clustering(pca_data[['PC1', 'PC2']], dynamic_n_clusters)
-        df_kmeans = pca_data.copy()
-        df_kmeans['Cluster'] = kmeans_labels.astype(str)
-        clustering_figure = graph.display_kmeans(df_kmeans)
-
+        
+        cluster, cluster_labels, centroids = analysis.kmeans_clustering(pca_data[['PC1', 'PC2']], dynamic_n_clusters)
+        
 
 
     elif selected_clustering == "gmm":
-        gmm, gmm_labels, _ = analysis.gausian_mixture_clustering(pca_data[['PC1', 'PC2']], 3)
-        final_labels = gmm_labels
+        # Silhouette scores
+        scores = analysis.silhouette_scores(pca_data[['PC1', 'PC2']], 10, "gmm")
+        dynamic_n_clusters = [k for k, v in scores.items() if v == max(scores.values())][0]
+        scoring_figure = graph.display_silhouette_scores(scores, "Gaussian Mixture")
+        cluster, cluster_labels, centroids = analysis.gausian_mixture_clustering(pca_data[['PC1', 'PC2']], dynamic_n_clusters)
+
+    df_clusters = pca_data.copy()
+    df_clusters['Cluster'] = cluster_labels.astype(str)
+    clustering_figure = graph.display_clustering(df_clusters)
+
+    if centroides:
+            clustering_figure = graph.add_centroids(clustering_figure, centroids, dynamic_n_clusters)
 
     # Visualisation du clustering
     # clustering_figure = analysis.visualise_consensus(pca_data, final_labels)
 
     # Mettre à jour le texte
-    n_clusters_text = f"Nombre de clusters trouvé : {dynamic_n_clusters}"
+    n_clusters_text = f"Meilleur nombre de clusters trouvé par la méthode silhouette : {dynamic_n_clusters}"
 
     return clustering_figure, pca_figure, scoring_figure, n_clusters_text
     

@@ -59,6 +59,8 @@ def plot_pca(pca_data):
         title='ACP des pays selon le score de bonheur en fonction des variables explicatives',
     )
     fig.update_traces(marker=dict(size=8))
+    fig.update_layout(
+        height=400)
     return fig
 
 
@@ -79,21 +81,22 @@ def display_silhouette_scores(scores, method_name) :
         title=f"Méthode de la silhouette pour {method_name}",
         xaxis_title='Nombre de clusters',
         yaxis_title='Indice de silhouette moyen',
-        template='plotly_white'
+        template='plotly_white',
+        height=300,
     )
 
     return fig
 
 
 
-def display_kmeans(df) :
+def display_clustering(df) :
     """
-    Affiche le graphique des clusters obtenus par KMeans
+    Affiche le graphique des clusters obtenus
     sur les deux premières composantes principales
     
     :param df: DataFrame contenant les données
     :type df: pandas.DataFrame
-    :return: Le graphique des clusters obtenus par KMeans
+    :return: Le graphique des clusters obtenus
     :rtype: plotly.graph_objs._figure.Figure
     """
     fig_kmeans = px.scatter(
@@ -107,3 +110,22 @@ def display_kmeans(df) :
 )
     fig_kmeans.update_layout(showlegend=False)
     return fig_kmeans
+
+
+def add_centroids(fig, centroids, n_clusters) :
+    # Convertir en DataFrame pour manipulation
+    centroids_df = pd.DataFrame(centroids, columns=['PC1', 'PC2'])
+    centroids_df['cluster'] = range(n_clusters)
+    fig.add_trace(
+    go.Scatter(
+        x=centroids_df['PC1'],
+        y=centroids_df['PC2'],
+        mode='markers',
+        marker=dict(size=12, color='black', symbol='x'),
+        name='Centroïdes'
+        )
+    )
+    
+    # Cacher la légende
+    fig.update_layout(showlegend=False)
+    return fig

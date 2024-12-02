@@ -42,17 +42,37 @@ def kmeans_clustering(df, n_clusters) :
     return kmeans, label, centroid
 
 
-def silhouette_scores_kmeans(df, n_clusters) :
-    silhouette_scores = {}
-    for i in range(2, n_clusters+1) :
-        kmeans, label, centroid = kmeans_clustering(df, i)
-        silhouette_scores[i] = silhouette_score(df, label)
-    return silhouette_scores
-
-
 def gausian_mixture_clustering(df, n_clusters) :
     gmm = GaussianMixture(n_components=n_clusters, random_state=42)
     gmm.fit(df)
     label = gmm.predict(df)
     centroid = gmm.means_
     return gmm, label, centroid
+
+
+def silhouette_scores(df, n_clusters,method) :
+    """
+    Calcule les scores de silhouette pour un nombre de clusters donné et une méthode donnée
+
+    :param df: DataFrame contenant les données
+    :type df: pandas.DataFrame
+    :param n_clusters: Nombre de clusters maximal
+    :type n_clusters: int
+    :param method: Méthode de clustering ("kmeans" ou "gmm")
+    :type method: str
+    :return: Dictionnaire des scores de silhouette
+    :rtype: dict
+    """
+    silhouette_scores = {}
+    for i in range(2, n_clusters+1) :
+        if method == "kmeans":
+            kmeans, label, centroid = kmeans_clustering(df, i)
+        elif method == "gmm":
+            gmm, label, centroid = gausian_mixture_clustering(df, i)
+        else :
+            print("Méthode pour silhouette non reconnue")
+            return
+        silhouette_scores[i] = silhouette_score(df, label)
+    return silhouette_scores
+
+
