@@ -2,6 +2,7 @@ from sklearn.decomposition import PCA
 import pandas as pd
 import util_func as util
 
+
 def get_pca(data):
     # Normalisation des données
     data_norm = util.standardise(data)
@@ -25,12 +26,13 @@ def get_pca(data):
 
 ## CLUSTERING
 
+import numpy as np
 from sklearn.metrics import silhouette_score
 from sklearn.preprocessing import StandardScaler
-import tools as t
 from sklearn.mixture import GaussianMixture
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
+from sklearn.cluster import SpectralClustering
 
 # KMEANS
 
@@ -76,3 +78,34 @@ def silhouette_scores(df, n_clusters,method) :
     return silhouette_scores
 
 
+
+def consensus_clustering(df, n_clusters):
+    kmeans, kmeans_labels, _ = kmeans_clustering(df, n_clusters)
+    gmm, gmm_labels, _ = gausian_mixture_clustering(df, n_clusters)
+
+    #matrice de consensus
+    n_samples = df.shape[0]
+    C = np.zeros((n_samples, n_samples))
+
+    #comparaison des labels
+    for i in range(n_samples):
+        for j in range(i + 1, n_samples):
+            if kmeans_labels[i] == kmeans_labels[j]:
+                C[i, j] += 1
+                C[j, i] += 1
+            if gmm_labels[i] == gmm_labels[j]:
+                C[i, j] += 1
+                C[j, i] += 1
+
+    # normaliser la matrice de consensus
+    C = C / 2
+
+    # matrice de distance
+    distance_matrix = 1 / (C + np.eye(n_samples))  # Ajout de l'identité pour éviter division par zéro
+    distance_matrix[np.isinf(distance_matrix)] = 0  # Remplacer les infinis par 0
+    distance_matrix[np.isnan(distance_matrix)] = 0
+
+    # Clustering avec cette matrice de distance
+    spectral = SpectralClustering(n_clusters=n_clusters, affinity='precomputed', random_state=42)
+    final_labels = spectral.fit_predict(distance_matrix)
+    return final_labels

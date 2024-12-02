@@ -89,7 +89,7 @@ def display_silhouette_scores(scores, method_name) :
 
 
 
-def display_clustering(df) :
+def display_clustering(df, title="") :
     """
     Affiche le graphique des clusters obtenus
     sur les deux premières composantes principales
@@ -107,6 +107,7 @@ def display_clustering(df) :
     color='Cluster', 
     hover_name='Country',
     color_discrete_sequence=px.colors.qualitative.G10,
+    title=title
 )
     fig_kmeans.update_layout(showlegend=False)
     return fig_kmeans

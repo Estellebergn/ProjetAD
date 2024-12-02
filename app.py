@@ -176,6 +176,7 @@ def render_tab_content(tab_name):
         options=[
             {"label": "K-means", "value": "kmeans"},
             {"label": "Gaussian Mixture", "value": "gmm"},
+            {"label": "Consensus", "value": "consensus"},
         ],
         value="kmeans",
         style={"width": "100%", "marginBottom": "20px"},
@@ -201,13 +202,22 @@ def render_tab_content(tab_name):
     # Graphique Clustering
     html.Div([
         dcc.Graph(id="dynamic_clustering", style={"width": "80%", "display": "inline-block", "verticalAlign": "top", "padding": "10px"}),
-        dcc.RadioItems(
-            options=[
-                {"label": "Avec centroides", "value": True},
-                {"label": "Sans centroides", "value": False},
-            ]
-            , id="centroides", value=False, style={"width": "15%", "display": "inline-block", "verticalAlign": "top", "padding": "10px"}),
-    ], ),
+        html.Div(
+        id="radioitems-container",  # Conteneur pour les RadioItems
+        children=[
+            dcc.RadioItems(
+                id="centroides",
+                options=[
+                    {"label": "Avec centroides", "value": True},
+                    {"label": "Sans centroides", "value": False},
+                ],
+                value=False,
+                style={"marginTop": "10px"},
+            ),
+        ],
+        style={"width": "15%", "display": "inline-block", "verticalAlign": "top",   "padding": "10px"},
+        ),
+    ]),
 
 
 ])
@@ -232,20 +242,20 @@ def update_graphs(selected_file):
     return carte_figure, hist_figure
 
 
-# @app.callback(
+@app.callback(
+    Output("radioitems-container", "style"),
+    Input("chosen_clustering", "value")
+)
+def toggle_radioitems_visibility(selected_clustering):
+    if selected_clustering == "consensus":
+        # Masquer les RadioItems si "consensus" est choisi
+        
+        return {"display": "none"}
+    else:
+        # Afficher les RadioItems pour les autres valeurs
+        return {"width": "15%", "display": "inline-block", "verticalAlign": "top", "padding": "10px"}
     
-#     Input("chosen_year_2", "value"),
-# )
-# def update_pca(selected_file):
-#     # Charger les données
-#     data_sorted, selected_year = util.charge_data(selected_file)
 
-#     # Analyse en Composantes Principales
-#     pca_data = analysis.get_pca(data_sorted)
-
-    
-
-#     return pca_figure
 
 @app.callback(
     Output("dynamic_clustering", "figure"),
@@ -278,7 +288,7 @@ def update_clustering(selected_file, selected_clustering,centroides):
         # nombre optimal de cluster = n_clusters
         
         cluster, cluster_labels, centroids = analysis.kmeans_clustering(pca_data[['PC1', 'PC2']], dynamic_n_clusters)
-        
+        title = f"K-means pour {dynamic_n_clusters} clusters en {selected_year}"
 
 
     elif selected_clustering == "gmm":
@@ -287,16 +297,22 @@ def update_clustering(selected_file, selected_clustering,centroides):
         dynamic_n_clusters = [k for k, v in scores.items() if v == max(scores.values())][0]
         scoring_figure = graph.display_silhouette_scores(scores, "Gaussian Mixture")
         cluster, cluster_labels, centroids = analysis.gausian_mixture_clustering(pca_data[['PC1', 'PC2']], dynamic_n_clusters)
+        title = f"Gaussian Mixture pour {dynamic_n_clusters} clusters en {selected_year}"
+
+    elif selected_clustering == "consensus":
+        centroides = False
+        scores = analysis.silhouette_scores(pca_data[['PC1', 'PC2']], 10, "gmm")
+        dynamic_n_clusters = [k for k, v in scores.items() if v == max(scores.values())][0]
+        scoring_figure = None
+        cluster_labels = analysis.consensus_clustering(pca_data[['PC1', 'PC2']], dynamic_n_clusters)
+        title = f"Consensus clustering pour {dynamic_n_clusters} clusters en {selected_year}"
 
     df_clusters = pca_data.copy()
     df_clusters['Cluster'] = cluster_labels.astype(str)
-    clustering_figure = graph.display_clustering(df_clusters)
+    clustering_figure = graph.display_clustering(df_clusters, title)
 
     if centroides:
             clustering_figure = graph.add_centroids(clustering_figure, centroids, dynamic_n_clusters)
-
-    # Visualisation du clustering
-    # clustering_figure = analysis.visualise_consensus(pca_data, final_labels)
 
     # Mettre à jour le texte
     n_clusters_text = f"Meilleur nombre de clusters trouvé par la méthode silhouette : {dynamic_n_clusters}"
