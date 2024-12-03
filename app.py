@@ -31,7 +31,8 @@ tab_selected_style = {
 # Layout principal
 app.layout = html.Div(
     [
-        html.H1("Tableau de Bord Dash", style={"textAlign": "center", "padding": "20px"}),
+        html.H1("Projet Dash Analyse de données", style={"textAlign": "center", "padding": "20px"}),
+        html.H2("Analyse du World Happiness Report", style={"textAlign": "center", "padding": "20px"}),
         dcc.Tabs(
             id="tabs",
             value="tab1",
@@ -212,7 +213,7 @@ def render_tab_content(tab_name):
                     {"label": "Sans centroides", "value": False},
                 ],
                 value=False,
-                style={"marginTop": "10px"},
+                style={"marginTop": "50px"},
             ),
         ],
         style={"width": "15%", "display": "inline-block", "verticalAlign": "top",   "padding": "10px"},
@@ -223,7 +224,58 @@ def render_tab_content(tab_name):
 ])
 
     elif tab_name == "tab3":
-        return html.Div("Contenu de l'onglet 3.")
+        return html.Div([
+            # Section Network
+            html.H3("Visualisation de Réseaux"),
+            html.P("Les visualisations de réseaux permettent de représenter des données sous forme de graphes. Elles sont utiles pour identifier des structures et des motifs dans les données."),
+            html.P("Dans le contexte du World Happiness Report, les visualisations de réseaux peuvent être utilisées pour identifier des corrélations entre les pays."),
+            html.P("Deux types de visualisations de réseaux sont présentés ici : un heatmap des corrélations entre les pays et un graphe des pays connectés par des liens de corrélation."),
+            html.Label("Sélectionner les données à afficher :"),
+            dcc.Dropdown(
+                id="chosen_year_graph",
+                options=[
+                    {"label": "2017", "value": "data/2017.csv"},
+                    {"label": "2018", "value": "data/2018.csv"},
+                    {"label": "2019", "value": "data/2019.csv"},
+                    {"label": "2020", "value": "data/2020.csv"},
+                    {"label": "2021", "value": "data/2021.csv"},
+                ],
+                value="data/2020.csv",
+                style={"width": "40%", "marginBottom":"-5px","marginLeft": "10px", "display": "inline-block"},
+            ),
+            # Heatmap
+            html.H2("Heatmap des corrélations entre pays"),
+            dcc.Graph(id="country_heatmap", style={"width": "65%", "display": "inline-block", "padding": "10px"}),
+            html.Div(
+                html.P("gnagnagni"),
+                style={"width": "30%", "display": "inline-block", "padding": "10px", "verticalAlign": "top"},
+                ),
+            # Network
+            html.H2("Visualisation du réseau de pays"),
+            html.Label("Seuil de corrélation :"),
+            dcc.Slider(
+                id="threshold",
+                min=0,
+                max=1,
+                step=0.05,
+                value=0.6,
+                marks={i: str(i) for i in [0, 0.2, 0.4, 0.6, 0.8, 1]},                
+            ),
+            dcc.Graph(id="dynamic_network", style={"width": "75%", "display": "inline-block", "padding": "10px"}),
+            dcc.RadioItems(
+                id="community",
+                options=[
+                    {"label": "Avec communautés", "value": True},
+                    {"label": "Sans communautés", "value": False},
+                ],
+                value=False,
+                style={"marginTop": "-50px", "display": "inline-block", "width": "20%", "marginBottom": "50px"},
+            ),
+
+        ]),
+
+
+
 
 
 @app.callback(
@@ -320,6 +372,32 @@ def update_clustering(selected_file, selected_clustering,centroides):
     return clustering_figure, pca_figure, scoring_figure, n_clusters_text
     
 
+
+@app.callback(
+    Output("country_heatmap", "figure"),
+    Output("dynamic_network", "figure"),
+    Input("chosen_year_graph", "value"),
+    Input("threshold", "value"),
+    Input("community", "value"),
+)
+def update_network(selected_file, chosen_threshold, community):
+    # Charger les données
+    data_sorted, selected_year = util.charge_data(selected_file)
+
+    # Générer la heatmap
+    correlation_matrix = analysis.get_country_heatmap(data_sorted)
+    heatmap_figure = graph.plot_heatmap(correlation_matrix)
+
+    # Générer le graphe
+    graph_data = analysis.get_country_graph(correlation_matrix, chosen_threshold)
+    if community:
+        graph_data, partition = analysis.add_community(graph_data)
+        network_figure = graph.display_network(graph_data, list(partition.values()))
+    else:
+        network_figure = graph.display_network(graph_data, util.standardise(data_sorted)["Happiness Score"])  
+
+
+    return heatmap_figure, network_figure
 
 # Lancer le serveur
 if __name__ == "__main__":

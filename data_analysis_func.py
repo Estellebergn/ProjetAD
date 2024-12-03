@@ -109,3 +109,39 @@ def consensus_clustering(df, n_clusters):
     spectral = SpectralClustering(n_clusters=n_clusters, affinity='precomputed', random_state=42)
     final_labels = spectral.fit_predict(distance_matrix)
     return final_labels
+
+## GRAPH
+
+import networkx as nx
+import community.community_louvain as community
+
+def get_country_heatmap(df_total):
+    df_standardise = util.standardise(df_total)
+    df_standardiseT = pd.DataFrame(df_standardise.T)
+    df_standardiseT.columns = df_total['Country']
+    correlation_matrix = df_standardiseT.corr()
+    return correlation_matrix
+
+def get_country_graph(correlation_matrix, threshold):
+    countries = correlation_matrix.columns
+    correlation_matrix = np.array(correlation_matrix)
+    # Créer un graphe NetworkX
+    graph = nx.Graph()
+
+    # Ajouter les nœuds (entités)
+    for i, country in enumerate(countries):
+        graph.add_node(i, label=country)
+
+    # Ajouter les arêtes si la corrélation dépasse le seuil
+    for i in range(len(correlation_matrix)):
+        for j in range(i + 1, len(correlation_matrix)):
+            if correlation_matrix[i, j] > threshold :
+                graph.add_edge(i, j, weight=correlation_matrix[i, j])
+    
+    return graph
+
+def add_community(graph) :
+    #Appliquer louvain
+    partition = community.best_partition(graph)
+    nx.set_node_attributes(graph, partition, 'community')
+    return graph, partition
