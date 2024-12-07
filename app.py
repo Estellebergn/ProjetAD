@@ -5,10 +5,11 @@ import pandas as pd
 import graph_func as graph
 import util_func as util
 import data_analysis_func as analysis
+import plotly.graph_objects as go
 
 # Initialiser l'application Dash
 app = dash.Dash(__name__, suppress_callback_exceptions=True)
-app.title = "Application Dash Moderne"
+app.title = "Data Analysis Project"
 
 # Style des onglets
 tab_style = {
@@ -31,15 +32,15 @@ tab_selected_style = {
 # Layout principal
 app.layout = html.Div(
     [
-        html.H1("Projet Dash Analyse de données", style={"textAlign": "center", "padding": "20px"}),
-        html.H2("Analyse du World Happiness Report", style={"textAlign": "center", "padding": "20px"}),
+        html.H1("Data Analysis Project", style={"textAlign": "center", "padding": "20px"}),
+        html.H2("World Hapiness Report Analysis", style={"textAlign": "center", "padding": "20px"}),
         dcc.Tabs(
             id="tabs",
             value="tab1",
             children=[
-                dcc.Tab(label="Vue d'ensemble des données", value="tab1"),
+                dcc.Tab(label="Data overview", value="tab1"),
                 dcc.Tab(label="Clustering", value="tab2"),
-                dcc.Tab(label="Graph", value="tab3"),
+                dcc.Tab(label="Network view", value="tab3"),
             ],
         ),
         html.Div(id="content"),
@@ -61,7 +62,7 @@ def render_tab_content(tab_name):
                 # Dropdown pour sélectionner les données
                 html.Div(
                     [
-                        html.Label("Sélectionner les données à afficher :"),
+                        html.Label("Select data :"),
                         dcc.Dropdown(
                             id="chosen_year",
                             options=[
@@ -80,27 +81,32 @@ def render_tab_content(tab_name):
                 # Texte explicatif
                 html.Div(
                     [
-                        html.H3("Vue d'ensemble des données"),
+                        html.H3("Data overview"),
                         html.P(
                             """
-                            Le World Happiness Report est une étude annuelle qui mesure et classe les pays en fonction 
-                            de leur niveau de bonheur perçu par leurs citoyens. Ce rapport repose sur des données issues 
-                            des enquêtes du Gallup World Poll. Les citoyens évaluent leur vie sur une échelle de 0 à 10, 
-                            où 10 représente la meilleure vie possible.
-                            Les facteurs suivants sont pris en compte pour évaluer le bonheur :
+                            The World Happiness Report is an annual study that measures and ranks countries
+                            according to their level of happiness perceived by their citizens. 
+                            This report is based on data from Gallup World Poll surveys. 
+                            Citizens rate their lives on a scale of 0 to 10, where 10 represents the best possible life. 
+                            The following factors are considered to assess happiness:
                             """
                         ),
                         html.Ul(
                             [
-                                html.Li("Ladder Score (Score de bonheur) : Une moyenne des évaluations subjectives de la vie."),
-                                html.Li("Logged GDP per capita : Une mesure du PIB par habitant."),
-                                html.Li("Social Support (Soutien social) : La perception de pouvoir compter sur quelqu'un en cas de besoin."),
-                                html.Li("Healthy Life Expectancy (Espérance de vie en bonne santé) : L'espérance de vie corrigée en fonction des conditions de santé."),
-                                html.Li("Freedom to make life choices (Liberté de faire des choix de vie) : Le sentiment de liberté dans les décisions personnelles."),
-                                html.Li("Generosity (Générosité) : Les tendances à faire des dons ou à aider les autres."),
-                                html.Li("Perceptions of Corruption (Perception de la corruption) : Le niveau perçu de corruption dans le gouvernement et les affaires."),
+                                html.Li("Hapiness Score: An average of subjective ratings of life."),
+                                html.Li("Logged GDP per capita : Measure of Gross Domesctic Product per capita."),
+                                html.Li("Social Support : The perception of being able to rely on someone in times of need."),
+                                html.Li("Healthy Life Expectancy : Life expectancy adjusted for health conditions."),
+                                html.Li("Freedom to make life choices : The feeling of freedom in personal decisions."),
+                                html.Li("Generosity : Tendencies to donate or help others."),
+                                html.Li("Perceptions of Corruption : The perceived level of corruption in government and business."),
                             ]
                         ),
+                        html.P(
+                            """
+                            The countries in grey on the country map are the countries for which no data is available.
+                            """
+                        )
                     ],
                     style={
                         "width": "37%",
@@ -135,15 +141,9 @@ def render_tab_content(tab_name):
     # Autres onglets
     elif tab_name == "tab2":
         return html.Div([
-    # Section ACP
-    html.H3("Clustering des données"),
-    html.H2("Analyse en Composantes Principales (ACP)"),
-    html.P("L'Analyse en Composantes Principales (ACP) est une méthode de réduction de dimensionnalité qui permet de visualiser les données dans un espace à deux dimensions."),
-    html.P("Cette technique permet de réduire la dimensionnalité des données en les projetant dans un nouvel espace composé de composantes principales."),
-    html.P("Les composantes principales sont des combinaisons linéaires des variables initiales qui capturent le maximum de variance des données."),
+        # Dropdown pour sélection de données
     
-    # Dropdown pour sélection de données
-    html.Label("Sélectionner les données à afficher :"),
+    html.Label("Select Data :"),
     dcc.Dropdown(
         id="chosen_year_2",
         options=[
@@ -157,21 +157,67 @@ def render_tab_content(tab_name):
         style={"width": "100%", "marginBottom": "20px"},
     ),
     
+    # Section ACP
+    html.Div([
+        html.H2("Data visualization in PCA"),
+        html.P("""PCA (Principal Component Analysis) is a method used to reduce the dimensionality of data by
+               projecting it onto two axes, called principal components. These axes are chosen to capture 
+               the maximum variance from the original data, making it easier to visualize relationships 
+               between variables while simplifying their representation."""),
+        html.P("""In PCA, the distance between points in the reduced space represents their similarity 
+               based on the original variables: points that are close indicate similar observations, 
+               while points that are far apart reflect significant differences."""),
+    ],
+    style={
+    "width": "97%",
+    "display": "inline-block",
+    "verticalAlign": "top",
+    "padding": "15px",
+    "marginRight": "5px",
+    "backgroundColor": "#f9f9f9",
+    "borderRadius": "10px",
+    "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
+    "textAlign": "justify",
+    }),
+
+    
     # Graphique ACP
     html.Div([
         dcc.Graph(id="dynamic_pca"),
     ], style={"width": "100%", "padding": "10px"}),
 
     # Section Clustering
-    html.H2("Le Clustering (K-means et Gaussian Mixture)"),
-    html.P("Le clustering est une méthode d'apprentissage non supervisée qui permet de regrouper les données en fonction de leurs similarités."),
-    html.P("Les algorithmes de clustering permettent de diviser les données en groupes homogènes, appelés clusters."),
-    html.P("Deux algorithmes de clustering couramment utilisés sont le K-means et le Gaussian Mixture."),
-    html.P("Le K-means divise les données en K clusters en minimisant la somme des distances au carré entre les points et les centres de chaque cluster."),
-    html.P("Le Gaussian Mixture modélise les données comme un mélange de distributions gaussiennes, permettant de modéliser des clusters de formes complexes."),
+    html.Div([
+        html.H2("Clustering (K-means and Gaussian Mixture)"),
+        html.P("Clustering is an unsupervised learning method used to group data based on their similarities."),
+        html.Ul(
+                [
+                    html.Li("""K-means: A clustering method that partitions data into K clusters
+                             based on the similarity of points. It is fast but assumes that clusters
+                             are spherical and of similar size, which can be a limitation."""),
+                    html.Li("""Gaussian Mixture Models (GMM): A probabilistic approach that models
+                             data as a combination of normal distributions. Each point has a probability
+                             of belonging to each cluster, offering greater flexibility compared to K-means."""),
+                    html.Li("""Consensus: Used to combine k-means clustering and GMM clustering results to find a more stable
+                             and robust partition, particularly useful when dealing with complex or noisy data."""),
+                ]
+                ),
+    ],
+    style={
+    "width": "97%",
+    "display": "inline-block",
+    "verticalAlign": "top",
+    "padding": "15px",
+    "marginRight": "5px",
+    "backgroundColor": "#f9f9f9",
+    "borderRadius": "10px",
+    "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
+    "textAlign": "justify",
+    }),
+    html.P(""),
 
     # Dropdown pour choix d'algorithme
-    html.Label("Sélectionner l'algorithme de clustering :"),
+    html.Label("Select clustering algorithm :"),
     dcc.Dropdown(
         id="chosen_clustering",
         options=[
@@ -192,12 +238,24 @@ def render_tab_content(tab_name):
 
         # Paragraphe silhouette score
         html.Div([
-            html.P("Le silhouette score mesure la cohérence des clusters en évaluant à quel point les points d'un cluster sont proches les uns des autres (cohésion) par rapport aux points des clusters voisins (séparation)."),
+            html.P("""The Silhouette Score helps in choosing the optimal number of clusters k
+                    by measuring the quality of the clustering. A high Silhouette Score indicates
+                   that points are well grouped within their clusters and well separated from other clusters. 
+                   By testing different values of k, the highest score identifies the number of clusters 
+                   that provides the best cohesion and separation. Therefore, the optimal k corresponds 
+                   to the value with the highest score."""),
             html.P(
                 id="dynamic_n_clusters_text",
                 children="Nombre de clusters trouvé :",
             ),
-        ], style={"width": "40%", "display": "inline-block", "verticalAlign": "top", "padding": "10px"}),
+        ], style={"width": "40%",
+                   "display": "inline-block",
+                   "verticalAlign": "top",
+                   "padding": "10px",
+                   "backgroundColor": "#f9f9f9",
+                   "borderRadius": "10px",
+                   "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                   "textAlign": "justify"}),
     ]),
 
     # Graphique Clustering
@@ -328,10 +386,14 @@ def update_clustering(selected_file, selected_clustering,centroides):
     # Générer le graphique
     pca_figure = graph.plot_pca(pca_data)
 
+    #Initialisation
+    scoring_figure = None
+    dynamic_n_clusters = None
+    title = ""
+    cluster_labels = None
+    centroids = None
 
     # Clustering
-
-    
     if selected_clustering == "kmeans":
         # Silhouette scores
         scores = analysis.silhouette_scores(pca_data[['PC1', 'PC2']], 10, "kmeans")
@@ -340,7 +402,7 @@ def update_clustering(selected_file, selected_clustering,centroides):
         # nombre optimal de cluster = n_clusters
         
         cluster, cluster_labels, centroids = analysis.kmeans_clustering(pca_data[['PC1', 'PC2']], dynamic_n_clusters)
-        title = f"K-means pour {dynamic_n_clusters} clusters en {selected_year}"
+        title = f"K-means for {dynamic_n_clusters} clusters in {selected_year}"
 
 
     elif selected_clustering == "gmm":
@@ -349,7 +411,7 @@ def update_clustering(selected_file, selected_clustering,centroides):
         dynamic_n_clusters = [k for k, v in scores.items() if v == max(scores.values())][0]
         scoring_figure = graph.display_silhouette_scores(scores, "Gaussian Mixture")
         cluster, cluster_labels, centroids = analysis.gausian_mixture_clustering(pca_data[['PC1', 'PC2']], dynamic_n_clusters)
-        title = f"Gaussian Mixture pour {dynamic_n_clusters} clusters en {selected_year}"
+        title = f"Gaussian Mixture for {dynamic_n_clusters} clusters in {selected_year}"
 
     elif selected_clustering == "consensus":
         centroides = False
@@ -357,7 +419,7 @@ def update_clustering(selected_file, selected_clustering,centroides):
         dynamic_n_clusters = [k for k, v in scores.items() if v == max(scores.values())][0]
         scoring_figure = None
         cluster_labels = analysis.consensus_clustering(pca_data[['PC1', 'PC2']], dynamic_n_clusters)
-        title = f"Consensus clustering pour {dynamic_n_clusters} clusters en {selected_year}"
+        title = f"Consensus clustering for {dynamic_n_clusters} clusters in {selected_year}"
 
     df_clusters = pca_data.copy()
     df_clusters['Cluster'] = cluster_labels.astype(str)
@@ -367,7 +429,7 @@ def update_clustering(selected_file, selected_clustering,centroides):
             clustering_figure = graph.add_centroids(clustering_figure, centroids, dynamic_n_clusters)
 
     # Mettre à jour le texte
-    n_clusters_text = f"Meilleur nombre de clusters trouvé par la méthode silhouette : {dynamic_n_clusters}"
+    n_clusters_text = f"Best number of clusters found by the silhouette method : {dynamic_n_clusters}"
 
     return clustering_figure, pca_figure, scoring_figure, n_clusters_text
     

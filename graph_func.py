@@ -9,7 +9,7 @@ def get_hist(data, year):
         data,
         x='Country',
         y='Happiness Score',
-        title='Histogramme du score de bonheur par pays en {}'.format(year),
+        title='Histogram of happiness score by country in {}'.format(year),
         color='Regional indicator',
         color_discrete_sequence=px.colors.qualitative.T10 ,
         template='plotly_white',
@@ -27,7 +27,7 @@ def get_carte(data, year):
         locations='Country',
         locationmode='country names',
         color='Happiness Score',
-        title='Carte du score de bonheur par pays en {}'.format(year),
+        title='Happiness Score Map by Country in {}'.format(year),
         color_continuous_scale='thermal',
     )
     carte.update_geos(showframe=False, showcoastlines=False)
@@ -57,7 +57,7 @@ def plot_pca(pca_data):
             'Perceptions of corruption': True
         },
         color_discrete_sequence=px.colors.qualitative.G10,
-        title='ACP des pays selon le score de bonheur en fonction des variables explicatives',
+        title='PCA of countries according to happiness score and measured variables.',
     )
     fig.update_traces(marker=dict(size=8))
     fig.update_layout(
@@ -79,9 +79,9 @@ def display_silhouette_scores(scores, method_name) :
     ))
 
     fig.update_layout(
-        title=f"Méthode de la silhouette pour {method_name}",
-        xaxis_title='Nombre de clusters',
-        yaxis_title='Indice de silhouette moyen',
+        title=f"Silhouette method {method_name}",
+        xaxis_title='Cluster number',
+        yaxis_title='Average Silhouette Index',
         template='plotly_white',
         height=300,
     )
@@ -124,7 +124,7 @@ def add_centroids(fig, centroids, n_clusters) :
         y=centroids_df['PC2'],
         mode='markers',
         marker=dict(size=12, color='black', symbol='x'),
-        name='Centroïdes'
+        name='Centroïds'
         )
     )
     
