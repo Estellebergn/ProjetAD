@@ -156,7 +156,7 @@ def plot_heatmap(df) :
     return fig
 
 
-def display_network(graph, color_by) :
+def display_network(graph, color_by, hapiness_score = None) :
     # Positionnement des nœuds avec spring_layout
     pos = nx.spring_layout(graph, seed=42)
 
@@ -181,41 +181,100 @@ def display_network(graph, color_by) :
         y=edge_y,
         line=dict(width=0.5, color="#888"),
         hoverinfo="none",
-        mode="lines"
+        mode="lines",
+        showlegend=False
     )
 
     # Ajouter les nœuds
     node_x = []
     node_y = []
     node_labels = []
+    node_hovertext = []
+    legend_traces = []
 
-    for node in graph.nodes(data=True):
+    for i, node in enumerate(graph.nodes(data=True)):
         x, y = pos[node[0]]
         node_x.append(x)
         node_y.append(y)
-        node_labels.append(node[1]['label'])
 
-    node_trace = go.Scatter(
-        x=node_x,
-        y=node_y,
-        mode="markers+text",
-        text=node_labels,
-        textposition="top center",
-        hoverinfo="text",
-        marker=dict(
-            color = color_by,
-            colorscale="Plasma",
-            size=10,
-            line_width=2
-        )
+        label = node[1]['label']
+        node_labels.append(label)
+        value = color_by[i]
+
+        if hapiness_score != None :
+            score = hapiness_score[i]
+            node_hovertext.append(f"{label} <br>Community : {value:.0f} <br>Hapiness score : {score:.2f}")
+        else : 
+            node_hovertext.append(f"{label} <br>Hapiness score : {value:.2f}")
+
+    if hapiness_score == None : 
+        node_trace = go.Scatter(
+            x=node_x,
+            y=node_y,
+            mode="markers+text",
+            text=node_labels,
+            textposition="top center",
+            hoverinfo="text",
+            hovertext=node_hovertext,
+            marker=dict(
+                color = color_by,
+                colorscale="Plasma",
+                size=10,
+                line_width=2,
+                colorbar=dict(
+                title="Happiness Score Value", 
+                thickness=15,
+                xanchor="left", 
+                titleside="right"),
+            ),
+            showlegend=False
     )
+    else :
+        discrete_colorscale = px.colors.qualitative.Set2
+        categories = list(set(color_by))
+        category_to_color = {cat: discrete_colorscale[i % len(discrete_colorscale)] for i, cat in enumerate(categories)}
+
+        #node color
+        node_colors = [category_to_color[col] for col in color_by]
+
+        node_trace = go.Scatter(
+            x=node_x,
+            y=node_y,
+            mode="markers+text",
+            text=node_labels,
+            textposition="top center",
+            hoverinfo="text",
+            hovertext=node_hovertext,
+            marker=dict(
+                color = node_colors,
+                size=10,
+                line_width=2
+            ),
+            showlegend=False
+        )
+
+        for cat, color in category_to_color.items():
+            legend_trace = go.Scatter(
+                x=[None],  # Pas de données réelles, juste pour la légende
+                y=[None],
+                mode="markers",
+                marker=dict(
+                    color=color,
+                    size=10,
+                    line_width=2
+                ),
+                name=f"Community {cat}",  # Nom de la catégorie
+                showlegend=True
+            )
+            legend_traces.append(legend_trace)
+
 
     # Créer la figure Plotly
-    fig = go.Figure(data=[edge_trace, node_trace],
+    fig = go.Figure(data=[edge_trace, node_trace] + legend_traces,
                     layout=go.Layout(
-                        title=f"Réseau des corrélations",
+                        title=f"Correlation between countries network",
                         titlefont_size=16,
-                        showlegend=False,
+                        showlegend=True,
                         hovermode="closest",
                         margin=dict(b=0, l=0, r=0, t=40),
                         xaxis=dict(showgrid=False, zeroline=False),

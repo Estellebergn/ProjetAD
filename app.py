@@ -450,8 +450,8 @@ def render_tab_content(tab_name):
             dcc.RadioItems(
                 id="community",
                 options=[
-                    {"label": "Avec communautés", "value": True},
-                    {"label": "Sans communautés", "value": False},
+                    {"label": "Coloration by Community", "value": True},
+                    {"label": "Coloration by Happiness Score", "value": False},
                 ],
                 value=False,
                 style={"marginTop": "-50px", "display": "inline-block", "width": "20%", "marginBottom": "50px"},
@@ -613,11 +613,12 @@ def update_network(selected_file, chosen_threshold, community):
 
     # Générer le graphe
     graph_data = analysis.get_country_graph(correlation_matrix, chosen_threshold)
+    hapiness_score = list(data_sorted["Happiness Score"])
     if community:
         graph_data, partition = analysis.add_community(graph_data)
-        network_figure = graph.display_network(graph_data, list(partition.values()))
+        network_figure = graph.display_network(graph_data, list(partition.values()), hapiness_score = hapiness_score )
     else:
-        network_figure = graph.display_network(graph_data, util.standardise(data_sorted)["Happiness Score"])  
+        network_figure = graph.display_network(graph_data, hapiness_score)  
 
 
     return heatmap_figure, network_figure
