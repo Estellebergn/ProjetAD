@@ -161,12 +161,12 @@ def render_tab_content(tab_name):
     html.Div([
         html.H3("Data visualization in PCA"),
         html.P("""PCA (Principal Component Analysis) is a method used to reduce the dimensionality of data by
-               projecting it onto two axes, called principal components. These axes are chosen to capture 
-               the maximum variance from the original data, making it easier to visualize relationships 
-               between variables while simplifying their representation."""),
+            projecting it onto two axes, called principal components. These axes are chosen to capture 
+            the maximum variance from the original data, making it easier to visualize relationships 
+            between variables while simplifying their representation."""),
         html.P("""In PCA, the distance between points in the reduced space represents their similarity 
-               based on the original variables: points that are close indicate similar observations, 
-               while points that are far apart reflect significant differences."""),
+            based on the original variables: points that are close indicate similar observations, 
+            while points that are far apart reflect significant differences."""),
     ],
     style={
     "width": "97%",
@@ -193,13 +193,13 @@ def render_tab_content(tab_name):
         html.Ul(
                 [
                     html.Li("""K-means: A clustering method that partitions data into K clusters
-                             based on the similarity of points. It is fast but assumes that clusters
-                             are spherical and of similar size, which can be a limitation."""),
+                        based on the similarity of points. It is fast but assumes that clusters
+                        are spherical and of similar size, which can be a limitation."""),
                     html.Li("""Gaussian Mixture Models (GMM): A probabilistic approach that models
-                             data as a combination of normal distributions. Each point has a probability
-                             of belonging to each cluster, offering greater flexibility compared to K-means."""),
+                        data as a combination of normal distributions. Each point has a probability
+                        of belonging to each cluster, offering greater flexibility compared to K-means."""),
                     html.Li("""Consensus: Used to combine k-means clustering and GMM clustering results to find a more stable
-                             and robust partition, particularly useful when dealing with complex or noisy data."""),
+                        and robust partition, particularly useful when dealing with complex or noisy data."""),
                 ]
                 ),
     ],
@@ -230,39 +230,41 @@ def render_tab_content(tab_name):
     ),
     
     # Graphique Scoring et paragraphe silhouette score
-    html.Div([
-        # Graphique des scores
-        html.Div([
-            dcc.Graph(id="dynamic_scoring"),
-        ], style={"width": "50%", "display": "inline-block"}),
+    html.Div(
+        id="score-container",  # ID ajouté pour le conteneur du score
+        children=[
+            # Graphique des scores
+            html.Div([
+                dcc.Graph(id="dynamic_scoring"),
+            ], style={"width": "50%", "display": "inline-block"}),
 
-        # Paragraphe silhouette score
-        html.Div([
-            html.P("""The Silhouette Score helps in choosing the optimal number of clusters k
-                    by measuring the quality of the clustering. A high Silhouette Score indicates
-                   that points are well grouped within their clusters and well separated from other clusters. 
-                   By testing different values of k, the highest score identifies the number of clusters 
-                   that provides the best cohesion and separation. Therefore, the optimal k corresponds 
-                   to the value with the highest score."""),
-            html.P(
-                id="dynamic_n_clusters_text",
-                children="Nombre de clusters trouvé :",
-            ),
-        ], style={"width": "45%",
-                   "display": "inline-block",
-                   "verticalAlign": "top",
-                   "padding": "10px",
-                   "backgroundColor": "#f9f9f9",
-                   "borderRadius": "10px",
-                   "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                   "textAlign": "justify",
-                   "marginTop": "70"}),
-    ]),
+            # Paragraphe silhouette score
+            html.Div([
+                html.P("""The Silhouette Score helps in choosing the optimal    number of clusters k
+                        by measuring the quality of the clustering. A high  Silhouette Score indicates
+                        that points are well grouped within their clusters  and well separated from other clusters. 
+                        By testing different values of k, the highest score     identifies the number of clusters 
+                        that provides the best cohesion and separation.     Therefore, the optimal k corresponds 
+                        to the value with the highest score."""),
+                html.P(
+                    id="dynamic_n_clusters_text",
+                    children="Nombre de clusters trouvé :",
+                ),
+            ], style={"width": "40%",
+                    "display": "inline-block",
+                    "verticalAlign": "top",
+                    "padding": "10px",
+                    "backgroundColor": "#f9f9f9",
+                    "borderRadius": "10px",
+                    "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                    "textAlign": "justify"}),
+        ],
+    ),
 
     # Graphique Clustering
     html.Div([
         dcc.Graph(id="dynamic_clustering", 
-                  style={"width": "70%", "display": "inline-block", "verticalAlign": "top", "padding": "10px"}),
+            style={"width": "70%", "display": "inline-block", "verticalAlign": "top", "padding": "10px"}),
         html.Div(
             id="radioitems-container",  # Conteneur pour les RadioItems
             children=[
@@ -364,7 +366,7 @@ def render_tab_content(tab_name):
 
 
 
-
+# Callback overview
 @app.callback(
     [Output("dynamic_carte", "figure"), Output("dynamic_hist", "figure")],
     Input("chosen_year", "value"),
@@ -381,19 +383,27 @@ def update_graphs(selected_file):
     return carte_figure, hist_figure
 
 
+# Callback consensus
 @app.callback(
-    Output("radioitems-container", "style"),
+    [
+        Output("radioitems-container", "style"),
+        Output("score-container", "style")
+    ],
     Input("chosen_clustering", "value")
 )
-def toggle_radioitems_visibility(selected_clustering):
+def toggle_visibility(selected_clustering):
     if selected_clustering == "consensus":
-        # Masquer les RadioItems si "consensus" est choisi
-        
-        return {"display": "none"}
+        # Masquer les RadioItems et le conteneur des scores
+        return (
+            {"display": "none"},  # RadioItems masqués
+            {"display": "none"}   # Score masqué
+        )
     else:
-        # Afficher les RadioItems pour les autres valeurs
-        return {"width": "15%", "display": "inline-block", "verticalAlign": "top", "padding": "10px"}
-    
+        # Afficher les RadioItems et le conteneur des scores
+        return (
+            {"width": "15%", "display": "inline-block", "verticalAlign": "top", "padding": "10px"},
+            {"display": "block"}  # Score visible
+        )
 
 
 @app.callback(
