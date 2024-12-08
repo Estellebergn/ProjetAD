@@ -143,7 +143,7 @@ def render_tab_content(tab_name):
         return html.Div([
         # Dropdown pour sélection de données
     
-    html.Label("Select Data :"),
+    html.Label("Select data :"),
     dcc.Dropdown(
         id="chosen_year_2",
         options=[
@@ -159,7 +159,7 @@ def render_tab_content(tab_name):
     
     # Section ACP
     html.Div([
-        html.H2("Data visualization in PCA"),
+        html.H3("Data visualization in PCA"),
         html.P("""PCA (Principal Component Analysis) is a method used to reduce the dimensionality of data by
                projecting it onto two axes, called principal components. These axes are chosen to capture 
                the maximum variance from the original data, making it easier to visualize relationships 
@@ -248,47 +248,58 @@ def render_tab_content(tab_name):
                 id="dynamic_n_clusters_text",
                 children="Nombre de clusters trouvé :",
             ),
-        ], style={"width": "40%",
+        ], style={"width": "45%",
                    "display": "inline-block",
                    "verticalAlign": "top",
                    "padding": "10px",
                    "backgroundColor": "#f9f9f9",
                    "borderRadius": "10px",
                    "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                   "textAlign": "justify"}),
+                   "textAlign": "justify",
+                   "marginTop": "70"}),
     ]),
 
     # Graphique Clustering
     html.Div([
-        dcc.Graph(id="dynamic_clustering", style={"width": "80%", "display": "inline-block", "verticalAlign": "top", "padding": "10px"}),
+        dcc.Graph(id="dynamic_clustering", 
+                  style={"width": "70%", "display": "inline-block", "verticalAlign": "top", "padding": "10px"}),
         html.Div(
-        id="radioitems-container",  # Conteneur pour les RadioItems
-        children=[
-            dcc.RadioItems(
-                id="centroides",
-                options=[
-                    {"label": "Avec centroides", "value": True},
-                    {"label": "Sans centroides", "value": False},
-                ],
-                value=False,
-                style={"marginTop": "50px"},
-            ),
-        ],
-        style={"width": "15%", "display": "inline-block", "verticalAlign": "top",   "padding": "10px"},
+            id="radioitems-container",  # Conteneur pour les RadioItems
+            children=[
+                dcc.RadioItems(
+                    id="centroides",
+                    options=[
+                        {"label": "Avec centroides", "value": True},
+                        {"label": "Sans centroides", "value": False},
+                    ],
+                    value=False,
+                    style={"marginTop": "100px",
+                        "marginBottom" : "20px",
+                        "padding" : "10px",
+                        "width" : "100%"},
+                ),
+                html.Div("""The three methods seem to produce similar clusterings, 
+                        highlighting a certain structure in the data.""",
+                        style={"width": "100%",
+                        "display": "inline-block",
+                        "verticalAlign": "top",
+                        "padding": "50px",
+                        "backgroundColor": "#f9f9f9",
+                        "borderRadius": "10px",
+                        "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                        "textAlign": "justify"}
+                )   
+            ],
+        style={"width": "100%", "display": "inline-block", "verticalAlign": "top", "padding": "50px"},
         ),
-    ]),
-
-
+    ],
+),
 ])
 
     elif tab_name == "tab3":
         return html.Div([
-            # Section Network
-            html.H3("Visualisation de Réseaux"),
-            html.P("Les visualisations de réseaux permettent de représenter des données sous forme de graphes. Elles sont utiles pour identifier des structures et des motifs dans les données."),
-            html.P("Dans le contexte du World Happiness Report, les visualisations de réseaux peuvent être utilisées pour identifier des corrélations entre les pays."),
-            html.P("Deux types de visualisations de réseaux sont présentés ici : un heatmap des corrélations entre les pays et un graphe des pays connectés par des liens de corrélation."),
-            html.Label("Sélectionner les données à afficher :"),
+            # Section Network 
+            html.Label("Select data :"),
             dcc.Dropdown(
                 id="chosen_year_graph",
                 options=[
@@ -299,10 +310,28 @@ def render_tab_content(tab_name):
                     {"label": "2021", "value": "data/2021.csv"},
                 ],
                 value="data/2020.csv",
-                style={"width": "40%", "marginBottom":"-5px","marginLeft": "10px", "display": "inline-block"},
+                style={"width": "100%", "marginBottom": "20px"},
             ),
+        
+            html.Div([
+                html.H3("Country/Country correlation heatmap"),
+                html.P("""The country/country correlation heatmap
+                        helps identify if two countries share similar
+                        trends."""),
+            ],
+            style={
+            "width": "97%",
+            "display": "inline-block",
+            "verticalAlign": "top",
+            "padding": "15px",
+            "marginRight": "5px",
+            "backgroundColor": "#f9f9f9",
+            "borderRadius": "10px",
+            "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
+            "textAlign": "justify",
+            }),
+
             # Heatmap
-            html.H2("Heatmap des corrélations entre pays"),
             dcc.Graph(id="country_heatmap", style={"width": "65%", "display": "inline-block", "padding": "10px"}),
             html.Div(
                 html.P("gnagnagni"),
