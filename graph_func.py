@@ -37,6 +37,17 @@ def get_carte(data, year):
 
     return carte
 
+def get_heatmap(corr_data, year) :
+    fig = px.imshow(
+        corr_data,
+        title=f"Correlation of measured heatmap in {year}",
+        labels=dict(x="Columns", y="Columns", color="Correlation"),
+        color_continuous_scale="RdBu",
+        zmin=-1, zmax=1, text_auto=True
+        )
+    fig.update_layout(width=900, height=800)
+    return fig
+
 def plot_pca(pca_data):
     fig = px.scatter(
         pca_data, 

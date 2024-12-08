@@ -102,14 +102,9 @@ def render_tab_content(tab_name):
                                 html.Li("Perceptions of Corruption : The perceived level of corruption in government and business."),
                             ]
                         ),
-                        html.P(
-                            """
-                            The countries in grey on the country map are the countries for which no data is available.
-                            """
-                        )
                     ],
                     style={
-                        "width": "37%",
+                        "width": "95%",
                         "display": "inline-block",
                         "verticalAlign": "top",
                         "padding": "15px",
@@ -125,13 +120,90 @@ def render_tab_content(tab_name):
                     [
                         dcc.Graph(id="dynamic_carte"),
                     ],
-                    style={"width": "57%", "display": "inline-block", "verticalAlign": "top", "padding": "10px"},
+                    style={"width": "50%", "display": "inline-block", "verticalAlign": "top", "padding": "10px"},
+                ),
+
+                html.Div([
+                    html.H3("Hapiness Score Map"),
+                    html.P(
+                            """
+                            The countries in grey on the country map are the countries for which
+                            no data is available.
+                            """
+                    ),
+                    html.P(
+                            """
+                            On the map, it can be observed that, overall, developed countries 
+                            tend to have a higher happiness score compared to not developed countries or developping countries.
+                            """
+                    )],
+                    style={"width": "44%",
+                           "display": "inline-block",
+                           "verticalAlign": "top",
+                           "padding": "15px",
+                           "marginRight": "5px",
+                           "backgroundColor": "#f9f9f9",
+                           "borderRadius": "10px",
+                           "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                           "textAlign": "justify",
+                           "marginTop" : "100px"}
                 ),
                 
                 # Graphique interactif 2 : Histogramme
+                html.Div([
+                    html.H3("Hapiness by Regional Indicator Histogram"),
+                    html.P(
+                            """
+                            On this histogram, we can see that the countries of Western Europe
+                            have a better happiness score than those of Sub-Saharan Africa, for example.
+                            """
+                    )],
+                    style={"width": "95%",
+                           "display": "inline-block",
+                           "verticalAlign": "top",
+                           "padding": "15px",
+                           "marginRight": "5px",
+                           "backgroundColor": "#f9f9f9",
+                           "borderRadius": "10px",
+                           "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                           "textAlign": "justify",
+                           "marginTop" : "100px"}
+                ),
+
                 html.Div(
                     [
                         dcc.Graph(id="dynamic_hist"),
+                    ],
+                    style={"width": "100%", "display": "inline-block", "verticalAlign": "top", "padding": "10px"},
+                ),
+
+                # Graphique 3 : matrice de corrélation entre variable observés 
+                html.Div([
+                    html.H3("Mesured variable correlation heatmap"),
+                    html.P(
+                            """
+                            The correlation heatmap between the measured variables allows us
+                            to identify which variables are dependent and exhibit a linear
+                            relationship. For example, we observe that the variables Happiness Score,
+                            Logged GDP per capita, social support, healthy life expectancy, and freedom
+                            to make life choices are often highly correlated over the years.
+                            """
+                    )],
+                    style={"width": "95%",
+                           "display": "inline-block",
+                           "verticalAlign": "top",
+                           "padding": "15px",
+                           "marginRight": "5px",
+                           "backgroundColor": "#f9f9f9",
+                           "borderRadius": "10px",
+                           "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                           "textAlign": "justify",
+                           "marginTop" : "100px"}
+                ),
+
+                html.Div(
+                    [
+                        dcc.Graph(id="dynamic_heatmap"),
                     ],
                     style={"width": "100%", "display": "inline-block", "verticalAlign": "top", "padding": "10px"},
                 ),
@@ -167,6 +239,10 @@ def render_tab_content(tab_name):
         html.P("""In PCA, the distance between points in the reduced space represents their similarity 
             based on the original variables: points that are close indicate similar observations, 
             while points that are far apart reflect significant differences."""),
+        html.P("""We can see, for example, that the countries of sub-Saharan Africa 
+               are close to each other: they are "grouped together". 
+               This reflects a homogeneity of measures within the countries of sub-Saharan Africa.
+               """),
     ],
     style={
     "width": "97%",
@@ -320,6 +396,7 @@ def render_tab_content(tab_name):
                 html.P("""The country/country correlation heatmap
                         helps identify if two countries share similar
                         trends."""),
+                html.P("""Once again, we can group developed countries and non-developed countries.""")
             ],
             style={
             "width": "97%",
@@ -335,13 +412,32 @@ def render_tab_content(tab_name):
 
             # Heatmap
             dcc.Graph(id="country_heatmap", style={"width": "65%", "display": "inline-block", "padding": "10px"}),
-            html.Div(
-                html.P("gnagnagni"),
-                style={"width": "30%", "display": "inline-block", "padding": "10px", "verticalAlign": "top"},
-                ),
+            
             # Network
-            html.H2("Visualisation du réseau de pays"),
-            html.Label("Seuil de corrélation :"),
+            html.Div([
+                html.H3("Graph-Based Visualization"),
+                html.P("""Nodes represent countries, and an edge between
+                        two countries is created if the correlation 
+                       threshold between them exceeds the chosen limit. 
+                       This approach allows the formation of groups of 
+                       similar countries. These country communities are 
+                       then detected using the Louvain algorithm. """),
+                html.P("""It is generally observed that countries connected by an edge on the map tend to have similar economic development levels.""")
+            ],
+            style={
+            "width": "97%",
+            "display": "inline-block",
+            "verticalAlign": "top",
+            "padding": "15px",
+            "marginRight": "5px",
+            "backgroundColor": "#f9f9f9",
+            "borderRadius": "10px",
+            "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
+            "textAlign": "justify",
+            "marginBottom" : "10px"
+            }),
+
+            html.Label("Correlation threshold :"),
             dcc.Slider(
                 id="threshold",
                 min=0,
@@ -361,6 +457,31 @@ def render_tab_content(tab_name):
                 style={"marginTop": "-50px", "display": "inline-block", "width": "20%", "marginBottom": "50px"},
             ),
 
+            
+            html.Div([
+                html.H3("Conclusion"),
+                html.P("""Combined with the correlation matrix of the measured variables,
+                        we can hypothesize that a country's economic development
+                        (GDP per capita) contributes to better healthy life expectancy,
+                        improved social support, and greater freedom to make life choices,
+                        which in turn leads to greater comfort and, consequently, a higher
+                        happiness score. However, this remains a hypothesis, as a correlation
+                        does not imply causality. """),
+                
+            ],
+            style={
+            "width": "97%",
+            "display": "inline-block",
+            "verticalAlign": "top",
+            "padding": "15px",
+            "marginRight": "5px",
+            "backgroundColor": "#f9f9f9",
+            "borderRadius": "10px",
+            "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
+            "textAlign": "justify",
+            }),
+
+
         ]),
 
 
@@ -368,19 +489,20 @@ def render_tab_content(tab_name):
 
 # Callback overview
 @app.callback(
-    [Output("dynamic_carte", "figure"), Output("dynamic_hist", "figure")],
+    [Output("dynamic_carte", "figure"), Output("dynamic_hist", "figure"), Output("dynamic_heatmap", "figure")],
     Input("chosen_year", "value"),
 )
 def update_graphs(selected_file):
     # Charger les données
     data_sorted, selected_year = util.charge_data(selected_file)
-
+    corr_data = analysis.get_measure_correlation(data_sorted)
 
     # Générer les graphiques
     carte_figure = graph.get_carte(data_sorted,selected_year)
     hist_figure = graph.get_hist(data_sorted,selected_year)
+    heatmap_figure = graph.get_heatmap(corr_data, selected_year)
 
-    return carte_figure, hist_figure
+    return carte_figure, hist_figure, heatmap_figure
 
 
 # Callback consensus

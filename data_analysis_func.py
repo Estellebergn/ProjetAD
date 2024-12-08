@@ -2,6 +2,11 @@ from sklearn.decomposition import PCA
 import pandas as pd
 import util_func as util
 
+def get_measure_correlation(data) :
+    data_st = util.standardise(data)
+    data_st = data_st.drop("Standard error of ladder score", axis = 1)
+    correlation_matrix = data_st.corr()
+    return correlation_matrix
 
 def get_pca(data):
     # Normalisation des données
