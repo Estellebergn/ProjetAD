@@ -4,7 +4,7 @@ import pandas as pd
 def normalize_columns(df, filename):    
 
     # Filtre colonnes
-    exclude_keywords = ["Dystopia", "whisker", "Explained by"]
+    exclude_keywords = ["Dystopia", "whisker", "Explained by", "error"]
     df = df[[col for col in df.columns if not any(keyword in col for keyword in exclude_keywords)]]
     # Renommage des colonnes
     column_mapping = {

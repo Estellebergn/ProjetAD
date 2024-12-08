@@ -1,0 +1,11 @@
+pandas
+dash
+numpy
+matplotlib
+scikit-learn
+seaborn
+scipy
+statsmodels
+plotly
+networkx
+python-louvain
